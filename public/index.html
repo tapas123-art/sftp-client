@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SFTP Client - File Upload</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 SFTP File Transfer</h1>
+            <p>Secure file upload and download via SFTP</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('upload')">📤 Upload</button>
+        </div>
+
+        <!-- Upload Form -->
+        <div id="upload-tab" class="tab-content active">
+            <form id="upload-form" enctype="multipart/form-data">
+                <h2>Upload File to SFTP Server</h2>
+                
+                <div class="form-section">
+                    <h3>Server Connection</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="upload-host">Host *</label>
+                            <input type="text" id="upload-host" name="host" placeholder="sftp.example.com" required>
+                        </div>
+                        <div class="form-group small">
+                            <label for="upload-port">Port</label>
+                            <input type="number" id="upload-port" name="port" placeholder="22" value="22">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Authentication</h3>
+                    <div class="form-group">
+                        <label for="upload-username">Username *</label>
+                        <input type="text" id="upload-username" name="username" placeholder="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-password">Password *</label>
+                        <input type="password" id="upload-password" name="password" placeholder="Enter password" required>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>File Details</h3>
+                    <div class="form-group">
+                        <label for="upload-file">Select File *</label>
+                        <button type="button" id="upload-file" class="btn-browse">Browse for File...</button>
+                        <div id="file-info" class="file-info"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-remote-path">Remote Path *</label>
+                        <input type="text" id="upload-remote-path" name="remotePath" value="/home/webapp/uploads/" placeholder="/home/webapp/uploads/filename.ext" required>
+                        <small>Filename will be automatically added when you select a file.</small>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-text">Upload File</span>
+                    <span class="btn-loading" style="display: none;">Uploading...</span>
+                </button>
+            </form>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

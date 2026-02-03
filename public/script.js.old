@@ -1,0 +1,318 @@
+// Tab switching
+function switchTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+    
+    // Clear message
+    hideMessage();
+}
+
+// Show/hide message
+function showMessage(message, type = 'info') {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = message;
+    messageEl.className = 'message show ' + type;
+    
+    // Auto hide after 5 seconds for success messages
+    if (type === 'success') {
+        setTimeout(() => {
+            hideMessage();
+        }, 5000);
+    }
+}
+
+function hideMessage() {
+    const messageEl = document.getElementById('message');
+    messageEl.classList.remove('show');
+}
+
+// Check if electron API is available
+if (!window.electron) {
+    console.error('Electron API not available!');
+    showMessage('Error: Application not properly initialized', 'error');
+}
+
+// File input change handler
+document.getElementById('upload-file')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    
+    try {
+        if (!window.electron || !window.electron.selectFile) {
+            showMessage('Error: File selection not available', 'error');
+            return;
+        }
+        
+        const filePath = await window.electron.selectFile();
+        if (filePath) {
+            const fileInfo = document.getElementById('file-info');
+            const fileName = filePath.split(/[\\/]/).pop();
+            fileInfo.innerHTML = `<strong>Selected:</strong> ${fileName}<br><small>${filePath}</small>`;
+            fileInfo.classList.add('show');
+            fileInfo.dataset.filePath = filePath;
+            
+            // Auto-fill remote path if empty
+            const remotePathInput = document.getElementById('upload-remote-path');
+            if (!remotePathInput.value) {
+                remotePathInput.value = '/uploads/' + fileName;
+            }
+        }
+    } catch (error) {
+        console.error('File selection error:', error);
+        showMessage('Error selecting file: ' + error.message, 'error');
+    }
+});
+
+// Upload form handler
+document.getElementById('upload-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const fileInfo = document.getElementById('file-info');
+    const localPath = fileInfo.dataset.filePath;
+    
+    if (!localPath) {
+        showMessage('Please select a file to upload', 'error');
+        return;
+    }
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    // Disable button and show loading
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-block';
+    hideMessage();
+    
+    try {
+        const config = {
+            host: formData.get('host'),
+            port: formData.get('port'),
+            username: formData.get('username'),
+            password: formData.get('password'),
+            privateKeyPath: formData.get('privateKeyPath'),
+            localPath: localPath,
+            remotePath: formData.get('remotePath')
+        };
+        
+        const result = await window.electron.uploadFile(config);
+        
+        if (result.success) {
+            showMessage(result.message, 'success');
+            this.reset();
+            fileInfo.classList.remove('show');
+            delete fileInfo.dataset.filePath;
+        } else {
+            showMessage('Error: ' + result.message, 'error');
+        }
+    } catcremotePath = formData.get('remotePath');
+    const fileName = remotePath.split('/').pop();
+    
+    // Show save dialog
+    const localPath = await window.electron.saveFileDialog(fileName);
+    if (!localPath) {
+        return; // User cancelled
+    }
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-block';
+    hideMessage();
+    
+    try {
+        const config = {
+            host: formData.get('host'),
+            port: formData.get('port'),
+            username: formData.get('username'),
+            password: formData.get('password'),
+            privateKeyPath: formData.get('privateKeyPath'),
+            remotePath: remotePath,
+            localPath: localPath
+        };
+        
+        const result = await window.electron.downloadFile(config);
+        
+        if (result.success) {
+            showMessage(result.message, 'success');
+        } else {
+            // Create blob and download
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            showMessage('File downloaded successfully!', 'success');
+        } else {
+            const result = await response.json();
+            showMessage('Error: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Error: ' + error.message, 'error');
+    } finally {
+        submitBtn.disabled = false;
+        btnText.style.display = 'inline-block';
+        btnLoading.style.display = 'none';
+    }
+});
+
+// List form handler
+document.getElementById('list-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData.entries());
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const fileList = document.getElementById('file-list');
+    
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-block';
+    hideMessage();
+    
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const btnLoading = submitBtn.querySelector('.btn-loading');
+    const fileList = document.getElementById('file-list');
+    
+    submitBtn.disabled = true;
+    btnText.style.display = 'none';
+    btnLoading.style.display = 'inline-block';
+    hideMessage();
+    fileList.classList.remove('show');
+    
+    try {
+        const config = {
+            host: formData.get('host'),
+            port: formData.get('port'),
+            username: formData.get('username'),
+            password: formData.get('password'),
+            privateKeyPath: formData.get('privateKeyPath'),
+            remotePath: formData.get('remotePath')
+        };
+        
+        const result = await window.electron.listDirectory(config
+        btnText.style.display = 'inline-block';
+        btnLoading.style.display = 'none';
+    }
+});
+
+// Display file list
+function displayFileList(files) {
+    const fileList = document.getElementById('file-list');
+    
+    if (files.length === 0) {
+        fileList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No files found</p>';
+    } else {
+        let html = '<h3>Directory Contents:</h3>';
+        files.forEach(file => {
+            const icon = file.isDirectory ? '📁' : '📄';
+            const className = file.isDirectory ? 'directory' : '';
+            const size = file.isDirectory ? 'DIR' : formatFileSize(file.size);
+            
+            html += `
+                <div class="file-item ${className}">
+                    <div>
+                        <span class="file-icon">${icon}</span>
+                        <span class="file-name">${file.name}</span>
+                    </div>
+                    <span class="file-size">${size}</span>
+                </div>
+            `;
+        });
+        fileList.innerHTML = html;
+    }
+    
+    fileList.classList.add('show');
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+// Private key browse button for upload form
+document.getElementById('upload-key-browse')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    try {
+        if (!window.electron || !window.electron.selectPrivateKey) {
+            showMessage('Error: Private key selection not available', 'error');
+            return;
+        }
+        
+        const keyPath = await window.electron.selectPrivateKey();
+        if (keyPath) {
+            document.getElementById('upload-key').value = keyPath;
+        }
+    } catch (error) {
+        console.error('Key selection error:', error);
+        showMessage('Error selecting private key: ' + error.message, 'error');
+    }
+});
+
+// Private key browse button for download form
+document.getElementById('download-key-browse')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    try {
+        if (!window.electron || !window.electron.selectPrivateKey) {
+            showMessage('Error: Private key selection not available', 'error');
+            return;
+        }
+        
+        const keyPath = await window.electron.selectPrivateKey();
+        if (keyPath) {
+            document.getElementById('download-key').value = keyPath;
+        }
+    } catch (error) {
+        console.error('Key selection error:', error);
+        showMessage('Error selecting private key: ' + error.message, 'error');
+    }
+});
+
+// Save location browse button for download form
+document.getElementById('download-save-browse')?.addEventListener('click', async function(e) {
+    e.preventDefault();
+    try {
+        if (!window.electron || !window.electron.saveFileDialog) {
+            showMessage('Error: Save dialog not available', 'error');
+            return;
+        }
+        
+        // Get suggested filename from remote path
+        const remotePath = document.getElementById('download-remote-path').value;
+        const suggestedName = remotePath ? remotePath.split(/[\\/]/).pop() : 'download';
+        
+        const savePath = await window.electron.saveFileDialog(suggestedName);
+        if (savePath) {
+            document.getElementById('download-save-path').value = savePath;
+        }
+    } catch (error) {
+        console.error('Save dialog error:', error);
+        showMessage('Error selecting save location: ' + error.message, 'error');
+    }
+});
