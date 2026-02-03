@@ -33,14 +33,23 @@ jobs:
       - name: Build for Linux
         if: matrix.os == 'ubuntu-latest'
         run: npx electron-builder --linux
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_FOR_PULL_REQUEST: false
       
       - name: Build for Windows
         if: matrix.os == 'windows-latest'
         run: npx electron-builder --win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_FOR_PULL_REQUEST: false
       
       - name: Build for macOS
         if: matrix.os == 'macos-latest'
         run: npx electron-builder --mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_FOR_PULL_REQUEST: false
       
       - name: Upload Linux artifacts
         if: matrix.os == 'ubuntu-latest'
